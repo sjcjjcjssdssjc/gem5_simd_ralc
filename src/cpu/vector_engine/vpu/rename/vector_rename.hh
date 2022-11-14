@@ -79,7 +79,7 @@ public:
             aux = frl_mem.front();
             frl_mem.pop_front();
             return aux;
-            }
+        }
         else
         {
             DPRINTF(VectorRename, "FRL Empty\n");
@@ -124,5 +124,3 @@ public:
 
 
 #endif // __CPU_VECTOR_RENAME_H__
-
-

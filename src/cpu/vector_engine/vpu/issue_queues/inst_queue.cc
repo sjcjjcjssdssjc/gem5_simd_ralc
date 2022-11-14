@@ -156,6 +156,7 @@ InstQueue::evaluate()
             vi_op = (Instruction->insn.func3()==3);
 
             if (masked_op) {
+                //vector_engine/vpu/register_file/vector_reg_valid_bit.cc
                 mask_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(mask);
             } else {
@@ -163,7 +164,9 @@ InstQueue::evaluate()
             }
 
             if ((Instruction->insn.arith2Srcs() ||
-                Instruction->insn.arith3Srcs()) && !( vx_op || vf_op || vi_op)) {
+                //float,integer?
+                //src2?
+                Instruction->insn.arith3Srcs())&& !(vx_op || vf_op || vi_op)) {
                 src1_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(src1);
             }
@@ -224,7 +227,7 @@ InstQueue::evaluate()
                     Instruction->insn.getName());
                 DPRINTF(InstQueue,"Arithmetic queue Size %d\n",
                     Instruction_Queue.size());
-                
+
                 if (Instruction->insn.VectorToScalar()) {
                     Instruction->dependencie_callback();
                 }
@@ -405,7 +408,7 @@ InstQueue::printMemInst(RiscvISA::VectorStaticInst& insn,VectorDynInst *vector_d
             DPRINTF(InstQueueRenInst,"issuing renamed inst: %s v%d %s       PC 0x%X\n",
                 insn.getName(),Pvs3,mask_ren.str(),*(uint64_t*)&pc);
         }
-        
+
     } else {
         panic("Invalid Vector Instruction insn=%#h\n", insn.machInst);
     }
@@ -478,4 +481,3 @@ InstQueueParams::create()
 {
     return new InstQueue(this);
 }
-
