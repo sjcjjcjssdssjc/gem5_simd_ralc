@@ -465,6 +465,7 @@ DefaultFetch<Impl>::isDrained() const
      */
     for (ThreadID i = 0; i < numThreads; ++i) {
         // Verify fetch queues are drained
+        // dummy
         if (!fetchQueue[i].empty())
             return false;
 
