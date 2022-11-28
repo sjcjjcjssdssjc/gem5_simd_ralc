@@ -98,7 +98,7 @@ LSQ<Impl>::LSQ(O3CPU *cpu_ptr, IEW *iew_ptr, DerivO3CPUParams *params)
         panic("Invalid LSQ sharing policy. Options are: Dynamic, "
                     "Partitioned, Threshold");
     }
-
+    //?
     thread.reserve(numThreads);
     for (ThreadID tid = 0; tid < numThreads; tid++) {
         thread.emplace_back(maxLQEntries, maxSQEntries);
@@ -179,6 +179,8 @@ void
 LSQ<Impl>::tick()
 {
     // Re-issue loads which got blocked on the per-cycle load ports limit.
+    // retryMemInsts.splice(retryMemInsts.end(), blockedMemInsts);
+    // Get the CPU ticking again
     if (usedLoadPorts == cacheLoadPorts && !_cacheBlocked)
         iewStage->cacheUnblocked();
 

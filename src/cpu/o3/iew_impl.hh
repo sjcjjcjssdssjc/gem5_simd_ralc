@@ -1509,9 +1509,11 @@ DefaultIEW<Impl>::tick()
 
     ldstQueue.tick();
 
+    //distribute into threads.
     sortInsts();
 
     // Free function units marked as being freed this cycle.
+    // When is it busy?
     fuPool->processFreeUnits();
 
     list<ThreadID>::iterator threads = activeThreads->begin();
