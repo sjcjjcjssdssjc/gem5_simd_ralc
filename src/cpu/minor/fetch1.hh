@@ -145,7 +145,7 @@ class Fetch1 : public Named
 
         /** Is this line out of date with the current stream/prediction
          *  sequence and can it be discarded without orphaning in flight
-         *  TLB lookups/memory accesses? */
+         *  TLB lookups/memory accesses?? */
         bool isDiscardable() const;
 
         /** Is this a complete read line or fault */

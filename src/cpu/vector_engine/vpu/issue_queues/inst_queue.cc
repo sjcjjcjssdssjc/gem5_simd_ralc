@@ -109,7 +109,7 @@ InstQueue::evaluate()
             " because is empty \n");
         return;
     }
-
+    //one of the lanes is available
     if (Instruction_Queue.size()!=0 && vectorwrapper->cluster_available())
     {
         /* For statistics */
@@ -157,6 +157,7 @@ InstQueue::evaluate()
 
             if (masked_op) {
                 //vector_engine/vpu/register_file/vector_reg_valid_bit.cc
+                //enabled where v0.mask[i]=1, vm=0
                 mask_ready = vectorwrapper->vector_reg_validbit->
                     get_preg_valid_bit(mask);
             } else {
@@ -213,11 +214,12 @@ InstQueue::evaluate()
                 [Instruction,this](Fault f) {
 
                 // Setting the Valid Bit
+                // return opClass() == VectorToScalarOp;
                 bool wb_enable = !Instruction->insn.VectorToScalar();
                 uint64_t renamed_dst = Instruction->dyn_insn->get_renamed_dst();
-                if (wb_enable)
-                {
-                vectorwrapper->vector_reg_validbit->set_preg_valid_bit(renamed_dst,1);
+                if (wb_enable) {
+                    vectorwrapper->vector_reg_validbit->
+                    set_preg_valid_bit(renamed_dst,1);
                 }
                 //Setting the executed bit in the ROB
                 uint16_t rob_entry = Instruction->dyn_insn->get_rob_entry();
@@ -256,9 +258,13 @@ InstQueue::evaluate()
 
         bool isStore = 0;
         bool isLoad = 0;
-        uint64_t src3=0;
-        uint64_t src2=0;
-        uint8_t mop=0;
+        //rs1[4:0]specifies x register holding base address
+        //rs2[4:0]specifies x register holding stride
+        //vs2[4:0]apecifies v register holding address offsets
+        //vs3[4:0]specifies v register holding store data
+        uint64_t src3 = 0;
+        uint64_t src2 = 0;
+        uint8_t mop = 0;
         bool indexed_op=0;
         uint64_t src_ready=0;
         bool ambiguous_dependency = 0;
@@ -267,8 +273,10 @@ InstQueue::evaluate()
         uint64_t queue_slot = 0;
         int queue_size = (OoO_queues) ? Memory_Queue.size() : 1;
         //int min = std::min(queue_size ,32);
-        for (int i=0 ; i< queue_size ; i++)
-        {
+        //Masked vector stores only update active memory elements.
+        //All vector loads and stores may generate and accept a
+        //non-zero vstart value.
+        for (int i = 0; i < queue_size; i++) {
 
             Mem_Instruction = Memory_Queue[i];
             isLoad = Mem_Instruction->insn.isLoad();
@@ -276,11 +284,12 @@ InstQueue::evaluate()
             src3 = Mem_Instruction->dyn_insn->get_renamed_src3();
             src2 = Mem_Instruction->dyn_insn->get_renamed_src2();
             mop = Mem_Instruction->insn.mop();
+            //memory addressing mode
             indexed_op = (mop == 3) || (mop == 7);
 
             // If the instruction is indexed we stop looking for the next
             // instructions, check dependencies for indexed is too expensive
-            if ( (indexed_op || isStore) && i>0){
+            if ((indexed_op || isStore) && i > 0) {
                 src_ready = 0;
                 break;
             }
